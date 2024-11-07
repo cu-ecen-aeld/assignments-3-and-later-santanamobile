@@ -13,7 +13,7 @@ FINDER_APP_DIR=$(realpath $(dirname $0))
 ARCH=arm64
 CROSS_COMPILE=aarch64-none-linux-gnu-
 WRITERAPP_HOME=$(pwd)
-TOOLCHAIN_LIBS="/usr/local/arm-cross-compiler/install/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu"
+TOOLCHAIN_LIBS="/usr/local/arm-cross-compiler/install/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc"
 
 if [ $# -lt 1 ]
 then
@@ -89,10 +89,11 @@ ${CROSS_COMPILE}readelf -a busybox | grep "program interpreter"
 ${CROSS_COMPILE}readelf -a busybox | grep "Shared library"
 
 # TODO: Add library dependencies to rootfs
-cp ${TOOLCHAIN_LOCATION}/libc/lib/ld-linux-aarch64.so.1 ${OUTDIR}/rootfs/lib
-cp ${TOOLCHAIN_LOCATION}/libc/lib64/libm.so.6           ${OUTDIR}/rootfs/lib64
-cp ${TOOLCHAIN_LOCATION}/libc/lib64/libresolv.so.2      ${OUTDIR}/rootfs/lib64
-cp ${TOOLCHAIN_LOCATION}/libc/lib64/libc.so.6           ${OUTDIR}/rootfs/lib64
+# /usr/local/arm-cross-compiler/install/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc
+cp ${TOOLCHAIN_LOCATION}/lib/ld-linux-aarch64.so.1 ${OUTDIR}/rootfs/lib
+cp ${TOOLCHAIN_LOCATION}/lib64/libm.so.6           ${OUTDIR}/rootfs/lib64
+cp ${TOOLCHAIN_LOCATION}/lib64/libresolv.so.2      ${OUTDIR}/rootfs/lib64
+cp ${TOOLCHAIN_LOCATION}/lib64/libc.so.6           ${OUTDIR}/rootfs/lib64
 
 # TODO: Make device nodes
 cd "${OUTDIR}/rootfs/dev"
