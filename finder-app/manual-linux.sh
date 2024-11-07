@@ -44,11 +44,6 @@ if [ ! -e ${OUTDIR}/linux-stable/arch/${ARCH}/boot/Image ]; then
     #make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} -j2 modules
     #make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} -j2 dtbs
 
-# Benchmark on my machine
-# real	113m50,991s
-# user	195m30,067s
-# sys	16m26,791s
-
 fi
 
 echo "Adding the Image in outdir"
@@ -94,10 +89,6 @@ ${CROSS_COMPILE}readelf -a busybox | grep "program interpreter"
 ${CROSS_COMPILE}readelf -a busybox | grep "Shared library"
 
 # TODO: Add library dependencies to rootfs
-#/opt/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/lib/ld-linux-aarch64.so.1
-#/opt/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/lib64/libm.so.6
-#/opt/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/lib64/libresolv.so.2
-#/opt/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/lib64/libc.so.6
 cp ${TOOLCHAIN_LOCATION}/libc/lib/ld-linux-aarch64.so.1 ${OUTDIR}/rootfs/lib
 cp ${TOOLCHAIN_LOCATION}/libc/lib64/libm.so.6           ${OUTDIR}/rootfs/lib64
 cp ${TOOLCHAIN_LOCATION}/libc/lib64/libresolv.so.2      ${OUTDIR}/rootfs/lib64
