@@ -13,8 +13,8 @@ FINDER_APP_DIR=$(realpath $(dirname $0))
 ARCH=arm64
 CROSS_COMPILE=aarch64-none-linux-gnu-
 WRITERAPP_HOME=$(pwd)
-#TOOLCHAIN_LOCATION="/opt/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu"
-TOOLCHAIN_LOCATION=$(realpath "/opt/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu")
+TOOLCHAIN_LIBS=/opt/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu
+#TOOLCHAIN_LIBS=/tmp
 
 if [ $# -lt 1 ]
 then
