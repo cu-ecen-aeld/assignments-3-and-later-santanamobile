@@ -13,8 +13,7 @@ FINDER_APP_DIR=$(realpath $(dirname $0))
 ARCH=arm64
 CROSS_COMPILE=aarch64-none-linux-gnu-
 WRITERAPP_HOME=$(pwd)
-TOOLCHAIN_LIBS=/opt/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu
-#TOOLCHAIN_LIBS=/tmp
+TOOLCHAIN_LIBS="/usr/local/arm-cross-compiler/install/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu"
 
 if [ $# -lt 1 ]
 then
@@ -38,9 +37,10 @@ if [ ! -e ${OUTDIR}/linux-stable/arch/${ARCH}/boot/Image ]; then
     git checkout ${KERNEL_VERSION}
 
     # TODO: Add your kernel build steps here
-    make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} mrproper
+    #make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} mrproper
     make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} defconfig
-    make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} -j2 all
+    make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} -j2 Image
+    #make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} -j2 all
     #make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} -j2 modules
     #make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} -j2 dtbs
 
