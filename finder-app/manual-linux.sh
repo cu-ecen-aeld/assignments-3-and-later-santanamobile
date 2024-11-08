@@ -109,14 +109,15 @@ cp writer ${OUTDIR}/rootfs/home
 # on the target rootfs
 # Copy your finder.sh, conf/username.txt, conf/assignment.txt and finder-test.sh
 # scripts from Assignment 2 into the outdir/rootfs/home directory.
-cp "${FINDER_APP_DIR}/autorun-qemu.sh" "${OUTDIR}/rootfs/home"
-cp "${FINDER_APP_DIR}/finder-test.sh" "${OUTDIR}/rootfs/home"
-cp "${FINDER_APP_DIR}/finder.sh" "${OUTDIR}/rootfs/home"
-cp "${FINDER_APP_DIR}/../conf/*" "${OUTDIR}/rootfs/home"
-#cp autorun-qemu.sh "${OUTDIR}/rootfs/home"
-#cp finder-test.sh "${OUTDIR}/rootfs/home"
-#cp finder.sh "${OUTDIR}/rootfs/home"
-#cp ../conf/* "${OUTDIR}/rootfs/home"
+#cp "${FINDER_APP_DIR}/autorun-qemu.sh" "${OUTDIR}/rootfs/home"
+#cp "${FINDER_APP_DIR}/finder-test.sh" "${OUTDIR}/rootfs/home"
+#cp "${FINDER_APP_DIR}/finder.sh" "${OUTDIR}/rootfs/home"
+#cp "${FINDER_APP_DIR}/../conf/*" "${OUTDIR}/rootfs/home"
+cd ${FINDER_APP_DIR}
+cp autorun-qemu.sh "${OUTDIR}/rootfs/home"
+cp finder-test.sh "${OUTDIR}/rootfs/home"
+cp finder.sh "${OUTDIR}/rootfs/home"
+cp ../conf/* "${OUTDIR}/rootfs/home"
 
 sed -i 's|username=$(cat conf/username.txt)|username=$(cat /home/username.txt)|' "${OUTDIR}/rootfs/home/finder-test.sh"
 sed -i 's|assignment=`cat ../conf/assignment.txt`|assignment=`cat /home/assignment.txt`|' "${OUTDIR}/rootfs/home/finder-test.sh"
