@@ -13,8 +13,8 @@ FINDER_APP_DIR=$(realpath $(dirname $0))
 ARCH=arm64
 CROSS_COMPILE=aarch64-none-linux-gnu-
 WRITERAPP_HOME=$(pwd)
-TOOLCHAIN_LOCATION=/usr/local/arm-cross-compiler/install/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc
-
+TOOLCHAIN_LOCATION="/usr/local/arm-cross-compiler/install/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc"
+#TOOLCHAIN_LOCATION="/opt/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/"
 if [ $# -lt 1 ]
 then
 	echo "Using default directory ${OUTDIR} for output"
@@ -61,7 +61,7 @@ mkdir -p bin dev etc home lib lib64 proc sbin sys tmp usr var
 mkdir -p usr/bin usr/lib usr/sbin
 mkdir -p var/log
 
-cp "${OUTDIR}/linux-stable/arch/arm64/boot/Image" "${OUTDIR}/rootfs"
+cp "${OUTDIR}/linux-stable/arch/arm64/boot/Image" "${OUTDIR}"
 
 cd "$OUTDIR"
 if [ ! -d "${OUTDIR}/busybox" ]
@@ -99,7 +99,8 @@ sudo mknod -m 666 null c 1 3
 sudo mknod -m 600 console c 5 1
 
 # TODO: Clean and build the writer utility
-cd ${WRITERAPP_HOME}
+# cd ${WRITERAPP_HOME}
+cd ${FINDER_APP_DIR}
 make clean
 make CROSS_COMPILE=${CROSS_COMPILE}
 cp writer ${OUTDIR}/rootfs/home
@@ -108,16 +109,19 @@ cp writer ${OUTDIR}/rootfs/home
 # on the target rootfs
 # Copy your finder.sh, conf/username.txt, conf/assignment.txt and finder-test.sh
 # scripts from Assignment 2 into the outdir/rootfs/home directory.
-cp autorun-qemu.sh "${OUTDIR}/rootfs/home"
-cp finder-test.sh "${OUTDIR}/rootfs/home"
-cp finder.sh "${OUTDIR}/rootfs/home"
-cp ../conf/* "${OUTDIR}/rootfs/home"
+cp "${FINDER_APP_DIR}/autorun-qemu.sh" "${OUTDIR}/rootfs/home"
+cp "${FINDER_APP_DIR}/finder-test.sh" "${OUTDIR}/rootfs/home"
+cp "${FINDER_APP_DIR}/finder.sh" "${OUTDIR}/rootfs/home"
+cp "${FINDER_APP_DIR}/../conf/*" "${OUTDIR}/rootfs/home"
+#cp autorun-qemu.sh "${OUTDIR}/rootfs/home"
+#cp finder-test.sh "${OUTDIR}/rootfs/home"
+#cp finder.sh "${OUTDIR}/rootfs/home"
+#cp ../conf/* "${OUTDIR}/rootfs/home"
 
 sed -i 's|username=$(cat conf/username.txt)|username=$(cat /home/username.txt)|' "${OUTDIR}/rootfs/home/finder-test.sh"
 sed -i 's|assignment=`cat ../conf/assignment.txt`|assignment=`cat /home/assignment.txt`|' "${OUTDIR}/rootfs/home/finder-test.sh"
 
 echo "#!/bin/sh
-
 /bin/sh" > "${OUTDIR}/rootfs/initramfs"
 
 chmod +x "${OUTDIR}/rootfs/initramfs"
