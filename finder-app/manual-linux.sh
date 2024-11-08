@@ -12,7 +12,6 @@ BUSYBOX_VERSION=1_33_1
 FINDER_APP_DIR=$(realpath $(dirname $0))
 ARCH=arm64
 CROSS_COMPILE=aarch64-none-linux-gnu-
-WRITERAPP_HOME=$(pwd)
 TOOLCHAIN_LOCATION="/usr/local/arm-cross-compiler/install/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc"
 #TOOLCHAIN_LOCATION="/opt/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/"
 if [ $# -lt 1 ]
@@ -39,7 +38,7 @@ if [ ! -e ${OUTDIR}/linux-stable/arch/${ARCH}/boot/Image ]; then
     # TODO: Add your kernel build steps here
     make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} mrproper
     make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} defconfig
-    make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} Image
+    make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} -j $(nproc) Image
     #make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} all
     #make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} modules
     #make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} dtbs
@@ -78,7 +77,7 @@ fi
 
 # TODO: Make and install busybox
 # 1 - Make busybox
-make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}
+make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} -j $(nproc)
 
 # 2 - Install busybox
 make CONFIG_PREFIX=${OUTDIR}/rootfs ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} install
@@ -99,7 +98,6 @@ sudo mknod -m 666 null c 1 3
 sudo mknod -m 600 console c 5 1
 
 # TODO: Clean and build the writer utility
-# cd ${WRITERAPP_HOME}
 cd ${FINDER_APP_DIR}
 make clean
 make CROSS_COMPILE=${CROSS_COMPILE}
@@ -109,10 +107,6 @@ cp writer ${OUTDIR}/rootfs/home
 # on the target rootfs
 # Copy your finder.sh, conf/username.txt, conf/assignment.txt and finder-test.sh
 # scripts from Assignment 2 into the outdir/rootfs/home directory.
-#cp "${FINDER_APP_DIR}/autorun-qemu.sh" "${OUTDIR}/rootfs/home"
-#cp "${FINDER_APP_DIR}/finder-test.sh" "${OUTDIR}/rootfs/home"
-#cp "${FINDER_APP_DIR}/finder.sh" "${OUTDIR}/rootfs/home"
-#cp "${FINDER_APP_DIR}/../conf/*" "${OUTDIR}/rootfs/home"
 cd ${FINDER_APP_DIR}
 cp autorun-qemu.sh "${OUTDIR}/rootfs/home"
 cp finder-test.sh "${OUTDIR}/rootfs/home"
