@@ -13,10 +13,7 @@ FINDER_APP_DIR=$(realpath $(dirname $0))
 ARCH=arm64
 CROSS_COMPILE=aarch64-none-linux-gnu-
 WRITERAPP_HOME=$(pwd)
-TOOLCHAIN_LIBS=/usr/local/arm-cross-compiler/install/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc
-
-# Only for testing
-echo "TOOLCHAIN_LIBS: ${TOOLCHAIN_LIBS}"
+TOOLCHAIN_LOCATION=/usr/local/arm-cross-compiler/install/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc
 
 if [ $# -lt 1 ]
 then
@@ -40,14 +37,12 @@ if [ ! -e ${OUTDIR}/linux-stable/arch/${ARCH}/boot/Image ]; then
     git checkout ${KERNEL_VERSION}
 
     # TODO: Add your kernel build steps here
-    #make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} mrproper
+    make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} mrproper
     make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} defconfig
     make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} Image
-    #make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} -j2 Image
-    #make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} -j2 all
-    #make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} -j2 modules
-    #make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} -j2 dtbs
-
+    #make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} all
+    #make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} modules
+    #make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} dtbs
 fi
 
 echo "Adding the Image in outdir"
@@ -83,7 +78,6 @@ fi
 
 # TODO: Make and install busybox
 # 1 - Make busybox
-#make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} -j2
 make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}
 
 # 2 - Install busybox
@@ -94,8 +88,6 @@ ${CROSS_COMPILE}readelf -a busybox | grep "program interpreter"
 ${CROSS_COMPILE}readelf -a busybox | grep "Shared library"
 
 # TODO: Add library dependencies to rootfs
-# /usr/local/arm-cross-compiler/install/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc
-# /usr/local/arm-cross-compiler/install/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc
 cp "${TOOLCHAIN_LOCATION}/lib/ld-linux-aarch64.so.1" "${OUTDIR}/rootfs/lib"
 cp "${TOOLCHAIN_LOCATION}/lib64/libm.so.6" "${OUTDIR}/rootfs/lib64"
 cp "${TOOLCHAIN_LOCATION}/lib64/libresolv.so.2" "${OUTDIR}/rootfs/lib64"
