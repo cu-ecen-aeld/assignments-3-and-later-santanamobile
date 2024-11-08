@@ -13,7 +13,10 @@ FINDER_APP_DIR=$(realpath $(dirname $0))
 ARCH=arm64
 CROSS_COMPILE=aarch64-none-linux-gnu-
 WRITERAPP_HOME=$(pwd)
-TOOLCHAIN_LIBS="/usr/local/arm-cross-compiler/install/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc"
+TOOLCHAIN_LIBS=/usr/local/arm-cross-compiler/install/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc
+
+# Only for testing
+echo "TOOLCHAIN_LIBS: ${TOOLCHAIN_LIBS}"
 
 if [ $# -lt 1 ]
 then
@@ -39,7 +42,8 @@ if [ ! -e ${OUTDIR}/linux-stable/arch/${ARCH}/boot/Image ]; then
     # TODO: Add your kernel build steps here
     #make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} mrproper
     make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} defconfig
-    make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} -j2 Image
+    make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} Image
+    #make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} -j2 Image
     #make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} -j2 all
     #make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} -j2 modules
     #make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} -j2 dtbs
@@ -57,7 +61,7 @@ then
 fi
 
 # TODO: Create necessary base directories
-mkdir -p ${OUTDIR}/rootfs && cd ${OUTDIR}/rootfs
+mkdir -p "${OUTDIR}/rootfs" && cd "${OUTDIR}/rootfs"
 mkdir -p bin dev etc home lib lib64 proc sbin sys tmp usr var
 mkdir -p usr/bin usr/lib usr/sbin
 mkdir -p var/log
@@ -79,7 +83,8 @@ fi
 
 # TODO: Make and install busybox
 # 1 - Make busybox
-make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} -j2
+#make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} -j2
+make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}
 
 # 2 - Install busybox
 make CONFIG_PREFIX=${OUTDIR}/rootfs ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} install
@@ -90,10 +95,11 @@ ${CROSS_COMPILE}readelf -a busybox | grep "Shared library"
 
 # TODO: Add library dependencies to rootfs
 # /usr/local/arm-cross-compiler/install/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc
-cp ${TOOLCHAIN_LOCATION}/lib/ld-linux-aarch64.so.1 ${OUTDIR}/rootfs/lib
-cp ${TOOLCHAIN_LOCATION}/lib64/libm.so.6           ${OUTDIR}/rootfs/lib64
-cp ${TOOLCHAIN_LOCATION}/lib64/libresolv.so.2      ${OUTDIR}/rootfs/lib64
-cp ${TOOLCHAIN_LOCATION}/lib64/libc.so.6           ${OUTDIR}/rootfs/lib64
+# /usr/local/arm-cross-compiler/install/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc
+cp "${TOOLCHAIN_LOCATION}/lib/ld-linux-aarch64.so.1" "${OUTDIR}/rootfs/lib"
+cp "${TOOLCHAIN_LOCATION}/lib64/libm.so.6" "${OUTDIR}/rootfs/lib64"
+cp "${TOOLCHAIN_LOCATION}/lib64/libresolv.so.2" "${OUTDIR}/rootfs/lib64"
+cp "${TOOLCHAIN_LOCATION}/lib64/libc.so.6" "${OUTDIR}/rootfs/lib64"
 
 # TODO: Make device nodes
 cd "${OUTDIR}/rootfs/dev"
