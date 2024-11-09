@@ -1,13 +1,12 @@
 CC = $(CROSS_COMPILE)gcc
 CFLAGS = -Wall -O2 -g
+SRC=writer.c
+TARGET=writer
 
-all: writer
+all: $(TARGET)
 
-writer: writer.o
-	$(CC) $(CFLAGS) -o writer writer.o
-
-writer.o: writer.c
-	$(CC) $(CFLAGS) -c writer.c
+$(TARGET): $(SRC)
+	$(CC) $(CFLAGS) -o $(TARGET) $(SRC)
 
 clean:
-	rm -f *.o writer
+	rm -f $(TARGET)
