@@ -1,10 +1,10 @@
-CC = $(CROSS_COMPILE)gcc
+CC ?= $(CROSS_COMPILE)gcc
 #CFLAGS = -Wall -Wextra -O0 -g -pthread
-CFLAGS = -Wall -O0 -g -pthread
-LDFLAGS = -pthread
+CFLAGS ?= -Wall -Werror -O0 -g -pthread
+LDFLAGS ?= -pthread
 
-SRC=aesdsocket.c
-TARGET=aesdsocket
+SRC = aesdsocket.c
+TARGET ?= aesdsocket
 OBJ = $(SRC:.c=.o)
 
 all: $(TARGET)
