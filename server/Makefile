@@ -1,5 +1,4 @@
 CC ?= $(CROSS_COMPILE)gcc
-#CFLAGS = -Wall -Wextra -O0 -g -pthread
 CFLAGS ?= -Wall -Werror -O0 -g -pthread
 LDFLAGS ?= -pthread
 

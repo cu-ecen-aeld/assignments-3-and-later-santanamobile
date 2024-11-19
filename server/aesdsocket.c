@@ -17,11 +17,11 @@
 #define PORT 9000
 #define BACKLOG 10
 #define BUFFER_SIZE 1024
-
+/*
 #ifndef USE_AESD_CHAR_DEVICE
 #define USE_AESD_CHAR_DEVICE 1
 #endif
-
+*/
 #if USE_AESD_CHAR_DEVICE
 #define DATA_FILE "/dev/aesdchar"
 #else
