@@ -7,11 +7,16 @@
 #include <linux/mutex.h>
 #include <linux/slab.h>
 #include <linux/uaccess.h> // for copy_to_user and copy_from_user
+#include <linux/fs.h>
+#include <linux/mutex.h>
+#include <linux/slab.h>
+#include <linux/uaccess.h> // for copy_to_user and copy_from_user
 #include "aesdchar.h"
 
 int aesd_major = 0; // use dynamic major
 int aesd_minor = 0;
 
+MODULE_AUTHOR("Helder Santana");
 MODULE_AUTHOR("Helder Santana");
 MODULE_LICENSE("Dual BSD/GPL");
 
@@ -31,7 +36,12 @@ int aesd_release(struct inode *inode, struct file *filp)
 }
 
 ssize_t aesd_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos)
+ssize_t aesd_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos)
 {
+    struct aesd_dev *dev = filp->private_data;
+    struct aesd_buffer_entry *entry;
+    size_t entry_offset;
+    ssize_t bytes_copied = 0;
     struct aesd_dev *dev = filp->private_data;
     struct aesd_buffer_entry *entry;
     size_t entry_offset;
@@ -65,6 +75,8 @@ out:
 
 ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count, loff_t *f_pos)
 {
+    struct aesd_dev *dev = filp->private_data;
+    char *kbuf;
     struct aesd_dev *dev = filp->private_data;
     char *kbuf;
     ssize_t retval = -ENOMEM;
@@ -151,6 +163,7 @@ out:
     return retval;
 }
 
+
 struct file_operations aesd_fops = {
     .owner =    THIS_MODULE,
     .read =     aesd_read,
@@ -167,6 +180,7 @@ static int aesd_setup_cdev(struct aesd_dev *dev)
     dev->cdev.owner = THIS_MODULE;
     dev->cdev.ops = &aesd_fops;
     err = cdev_add(&dev->cdev, devno, 1);
+    err = cdev_add(&dev->cdev, devno, 1);
     if (err) {
         printk(KERN_ERR "Error %d adding aesd cdev", err);
     }
@@ -179,6 +193,8 @@ int aesd_init_module(void)
     int result;
 
     result = alloc_chrdev_region(&dev, aesd_minor, 1, "aesdchar");
+
+    result = alloc_chrdev_region(&dev, aesd_minor, 1, "aesdchar");
     aesd_major = MAJOR(dev);
     if (result < 0) {
         printk(KERN_WARNING "Can't get major %d\n", aesd_major);
@@ -189,10 +205,16 @@ int aesd_init_module(void)
     aesd_circular_buffer_init(&aesd_device.buffer);
     mutex_init(&aesd_device.lock);
 
+    memset(&aesd_device, 0, sizeof(struct aesd_dev));
+    aesd_circular_buffer_init(&aesd_device.buffer);
+    mutex_init(&aesd_device.lock);
+
     result = aesd_setup_cdev(&aesd_device);
+    if (result) {
     if (result) {
         unregister_chrdev_region(dev, 1);
     }
+
 
     return result;
 }
@@ -210,8 +232,16 @@ void aesd_cleanup_module(void)
         if (entry->buffptr)
             kfree(entry->buffptr);
     }
+    // Free all allocated buffers in the circular buffer
+    struct aesd_buffer_entry *entry;
+    uint8_t index;
+    AESD_CIRCULAR_BUFFER_FOREACH(entry, &aesd_device.buffer, index) {
+        if (entry->buffptr)
+            kfree(entry->buffptr);
+    }
 
     unregister_chrdev_region(devno, 1);
+    mutex_destroy(&aesd_device.lock);
     mutex_destroy(&aesd_device.lock);
 }
 
