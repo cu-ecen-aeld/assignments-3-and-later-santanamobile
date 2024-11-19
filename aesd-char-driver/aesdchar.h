@@ -15,7 +15,7 @@
 #    define PDEBUG(fmt, args...) fprintf(stderr, fmt, ## args)
 #  endif
 #else
-#error "This is a kernel space header file, user-space usage is not supported."
+#  define PDEBUG(fmt, args...) /* not debugging: nothing */
 #endif
 
 struct aesd_dev {
@@ -27,3 +27,4 @@ struct aesd_dev {
 };
 
 #endif /* AESDCHAR_H */
+
