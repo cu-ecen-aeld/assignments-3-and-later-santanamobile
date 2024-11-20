@@ -17,11 +17,11 @@
 #define PORT 9000
 #define BACKLOG 10
 #define BUFFER_SIZE 1024
-/*
-#ifndef USE_AESD_CHAR_DEVICE
+
+//#ifndef USE_AESD_CHAR_DEVICE
 #define USE_AESD_CHAR_DEVICE 1
-#endif
-*/
+//#endif
+
 #if USE_AESD_CHAR_DEVICE
 #define DATA_FILE "/dev/aesdchar"
 #else
@@ -65,7 +65,8 @@ void *connection_handler(void *arg) {
         pthread_mutex_lock(&file_mutex);
 
         if (file_fd == -1) {
-            file_fd = open(DATA_FILE, O_RDWR | O_CREAT | O_APPEND, 0666);
+            /* file_fd = open(DATA_FILE, O_RDWR | O_CREAT | O_APPEND, 0666); */
+            file_fd = open(DATA_FILE, O_RDWR | O_CREAT, 0666);
             if (file_fd == -1) {
                 syslog(LOG_ERR, "Error opening file %s: %s", DATA_FILE, strerror(errno));
                 pthread_mutex_unlock(&file_mutex);
