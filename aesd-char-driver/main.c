@@ -1,3 +1,16 @@
+/**
+ * @file aesdchar.c
+ * @brief Functions and data related to the AESD char driver implementation
+ *
+ * Based on the implementation of the "scull" device driver, found in
+ * Linux Device Drivers example code.
+ *
+ * @author Dan Walkes
+ * @date 2019-10-22
+ * @copyright Copyright (c) 2019
+ *
+ */
+
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/printk.h>
@@ -13,7 +26,7 @@
 int aesd_major = 0; // use dynamic major
 int aesd_minor = 0;
 
-MODULE_AUTHOR("Helder Santana");
+MODULE_AUTHOR("santanamobile");
 MODULE_LICENSE("Dual BSD/GPL");
 
 struct aesd_dev aesd_device;
@@ -219,4 +232,3 @@ void aesd_cleanup_module(void)
 
 module_init(aesd_init_module);
 module_exit(aesd_cleanup_module);
-

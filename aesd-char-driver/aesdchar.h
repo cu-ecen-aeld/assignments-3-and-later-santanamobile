@@ -1,5 +1,12 @@
-#ifndef AESDCHAR_H
-#define AESDCHAR_H
+/*
+ * aesdchar.h
+ *
+ *  Created on: Oct 23, 2019
+ *      Author: Dan Walkes
+ */
+
+#ifndef AESD_CHAR_DRIVER_AESDCHAR_H_
+#define AESD_CHAR_DRIVER_AESDCHAR_H_
 
 #include "aesd-circular-buffer.h"
 
@@ -26,5 +33,4 @@ struct aesd_dev {
     struct cdev cdev;                     // Character device structure
 };
 
-#endif /* AESDCHAR_H */
-
+#endif /* AESD_CHAR_DRIVER_AESDCHAR_H_ */
