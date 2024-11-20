@@ -79,89 +79,92 @@ out:
 
 ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count, loff_t *f_pos)
 {
+    ssize_t retval = 0;
+    char *kernel_buffer = NULL;
+    size_t newline_offset;
+    bool newline_found = false;
     struct aesd_dev *dev = filp->private_data;
-    char *kbuf;
-    ssize_t retval = -ENOMEM;
-    size_t newline_pos;
-    size_t bytes_remaining;
-    PDEBUG("write %zu bytes with offset %lld", count, *f_pos);
 
-    if (mutex_lock_interruptible(&dev->lock))
-        return -ERESTARTSYS;
+    if (!dev)
+        return -EFAULT;
 
-    kbuf = kmalloc(count, GFP_KERNEL);
-    if (!kbuf) {
-        retval = -ENOMEM;
-        goto out;
-    }
+    // Allocate temporary kernel buffer for incoming write data
+    kernel_buffer = kmalloc(count, GFP_KERNEL);
+    if (!kernel_buffer)
+        return -ENOMEM;
 
-    if (copy_from_user(kbuf, buf, count)) {
+    // Copy data from user-space to kernel-space
+    if (copy_from_user(kernel_buffer, buf, count)) {
         retval = -EFAULT;
         goto out_free;
     }
 
-    // Check for newline
-    for (newline_pos = 0; newline_pos < count; newline_pos++) {
-        if (kbuf[newline_pos] == '\n')
+    // Lock the device for thread-safe access
+    mutex_lock(&dev->lock);
+
+    // Search for newline character in the incoming data
+    for (newline_offset = 0; newline_offset < count; newline_offset++) {
+        if (kernel_buffer[newline_offset] == '\n') {
+            newline_found = true;
             break;
+        }
     }
 
-    if (newline_pos < count) {
-        // Write is complete
-        size_t total_size = dev->partial_size + newline_pos + 1;
-        char *complete_write = kmalloc(total_size, GFP_KERNEL);
-        if (!complete_write) {
+    // Handle case where newline is found in the incoming data
+    if (newline_found) {
+        size_t write_size = newline_offset + 1; // Include the newline character
+        size_t total_size = write_size;
+
+        // Allocate new buffer for the complete command
+        char *complete_command = kmalloc(dev->partial_size + write_size, GFP_KERNEL);
+        if (!complete_command) {
             retval = -ENOMEM;
-            goto out_free;
+            goto out_unlock;
         }
 
-        // Combine partial data with new data
+        // Combine the partial buffer and new data
         if (dev->partial_buffer) {
-            memcpy(complete_write, dev->partial_buffer, dev->partial_size);
+            memcpy(complete_command, dev->partial_buffer, dev->partial_size);
+            total_size += dev->partial_size;
             kfree(dev->partial_buffer);
             dev->partial_buffer = NULL;
             dev->partial_size = 0;
         }
-        memcpy(complete_write + dev->partial_size, kbuf, newline_pos + 1);
+        memcpy(complete_command + total_size - write_size, kernel_buffer, write_size);
 
-        // Add to circular buffer
-        struct aesd_buffer_entry new_entry = {
-            .buffptr = complete_write,
-            .size = total_size
+        // Add the completed command to the circular buffer
+        struct aesd_buffer_entry entry = {
+            .buffptr = complete_command,
+            .size = total_size,
         };
-        aesd_circular_buffer_add_entry(&dev->buffer, &new_entry);
+        aesd_circular_buffer_add_entry(&dev->buffer, &entry);
 
-        // Free old entries if the buffer was full
-        if (dev->buffer.full) {
-            kfree(dev->buffer.entry[dev->buffer.out_offs].buffptr);
-        }
-
-        retval = newline_pos + 1;
-    } else {
-        // Append to partial buffer
-        bytes_remaining = count;
-        char *new_partial_buffer = kmalloc(dev->partial_size + bytes_remaining, GFP_KERNEL);
-        if (!new_partial_buffer) {
+        retval = total_size;
+    } else { 
+        // Handle case where no newline is found
+        char *new_partial = kmalloc(dev->partial_size + count, GFP_KERNEL);
+        if (!new_partial) {
             retval = -ENOMEM;
-            goto out_free;
+            goto out_unlock;
         }
 
+        // Append new data to the partial buffer
         if (dev->partial_buffer) {
-            memcpy(new_partial_buffer, dev->partial_buffer, dev->partial_size);
+            memcpy(new_partial, dev->partial_buffer, dev->partial_size);
             kfree(dev->partial_buffer);
         }
-        memcpy(new_partial_buffer + dev->partial_size, kbuf, bytes_remaining);
+        memcpy(new_partial + dev->partial_size, kernel_buffer, count);
+        dev->partial_buffer = new_partial;
+        dev->partial_size += count;
 
-        dev->partial_buffer = new_partial_buffer;
-        dev->partial_size += bytes_remaining;
-
-        retval = bytes_remaining;
+        retval = count;
     }
 
-out_free:
-    kfree(kbuf);
-out:
+out_unlock:
     mutex_unlock(&dev->lock);
+
+out_free:
+    kfree(kernel_buffer);
     return retval;
 }
 
